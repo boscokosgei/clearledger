@@ -255,20 +255,36 @@ jobs:
             clearledger-ledger-service:${IMAGE_TAG} \
             clearledger-notification-service:${IMAGE_TAG} \
             clearledger-frontend:${IMAGE_TAG}; do
-            echo "→ Trivy: ${img}"
-            extra=()
+            echo "=========================================="
+            echo "→ Trivy Scanning: ${img}"
+            echo "=========================================="
+            
+            # Save JSON report for auth-service evidence upload
             if [[ "${img}" == clearledger-auth-service:* ]]; then
-              extra=(--format json --output trivy-auth-results.json)
+              trivy image --skip-db-update --exit-code 0 \
+                --severity CRITICAL,HIGH --ignore-unfixed \
+                --format json --output trivy-auth-results.json "${img}"
             fi
-            trivy image --skip-db-update --exit-code 0 \
-              --severity CRITICAL,HIGH --ignore-unfixed \
-              "${extra[@]}" "${img}"
+
+            # Print table output to logs & fail step if CRITICAL/HIGH found
+            trivy image --skip-db-update --exit-code 1 \
+              --severity CRITICAL,HIGH --ignore-unfixed "${img}"
           done
 
       - name: Auth SBOM + Grype (fixable HIGH+ only on auth-service)
         run: |
           export PATH="$HOME/.local/bin:$PATH"
+          echo "→ Syft: Generating SBOM for auth-service..."
           syft clearledger-auth-service:${IMAGE_TAG} -o spdx-json=sbom-auth.json
+
+          echo "=========================================="
+          echo "→ Grype: Printing found vulnerabilities..."
+          echo "=========================================="
+          # 1. Print formatted vulnerability table directly to CI stdout
+          grype sbom:sbom-auth.json --only-fixed
+
+          echo "→ Grype: Writing report & enforcing failure threshold..."
+          # 2. Write JSON report file and exit with code 2 if HIGH/CRITICAL exist
           grype sbom:sbom-auth.json --fail-on high --only-fixed \
             --output json --file grype-auth-results.json
 
