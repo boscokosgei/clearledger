@@ -268,7 +268,9 @@ jobs:
 
             # Print table output to logs & fail step if CRITICAL/HIGH found
             trivy image --skip-db-update --exit-code 1 \
-              --severity CRITICAL,HIGH --ignore-unfixed "${img}"
+              --severity CRITICAL,HIGH --ignore-unfixed \
+              --ignorefile .trivyignore \
+              "${img}"
           done
 
       - name: Auth SBOM + Grype (fixable HIGH+ only on auth-service)
