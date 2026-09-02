@@ -7,7 +7,8 @@ WORKDIR /app
 
 COPY requirements.txt .
 RUN --mount=type=cache,target=/root/.cache/pip,id=clearledger-pip,sharing=locked \
-    pip install --timeout 120 --retries 10 --no-cache-dir -r requirements.txt
+    pip install --timeout 120 --retries 10 --upgrade pip "setuptools>=78.1.1" "msgpack>=1.2.1" && \
+    pip install --timeout 120 --retries 10 --upgrade -r requirements.txt
 
 COPY prom_metrics.py main.py ./
 
