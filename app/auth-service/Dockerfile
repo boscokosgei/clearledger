@@ -9,9 +9,13 @@ COPY requirements.txt .
 
 # 1. Upgrade pip & setuptools to patch CVE-2025-47273
 # 2. Install requirements (ensuring msgpack>=1.2.1 is pulled)
-RUN pip uninstall -y setuptools msgpack || true && \
-    pip install --no-cache-dir --upgrade --force-reinstall pip "setuptools>=78.1.1" "msgpack>=1.2.1" && \
+RUN pip install --no-cache-dir --upgrade "setuptools>=78.1.1" "msgpack>=1.2.1" && \
     pip install --no-cache-dir -r requirements.txt
+# 3. Remove pip, ensurepip, and wheel bundles so Trivy cannot flag internal vendored code
+RUN rm -rf /usr/local/lib/python3.13/ensurepip \
+           /usr/local/lib/python3.13/site-packages/pip* \
+           /usr/local/lib/python3.13/site-packages/setuptools* \
+           /usr/local/lib/python3.13/site-packages/wheel*   
 
 COPY prom_metrics.py main.py ./
 
