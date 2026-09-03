@@ -6,9 +6,14 @@ RUN groupadd -r appuser && useradd -r -g appuser appuser
 WORKDIR /app
 
 COPY requirements.txt .
-RUN pip uninstall -y setuptools msgpack || true && \
-    pip install --no-cache-dir --upgrade --force-reinstall pip "setuptools>=78.1.1" "msgpack>=1.2.1" && \
+# 1. Install dependencies
+RUN pip install --no-cache-dir --upgrade "setuptools>=78.1.1" "msgpack>=1.2.1" && \
     pip install --no-cache-dir -r requirements.txt
+# 2. Remove pip, ensurepip, and wheel bundles so Trivy cannot flag internal vendored code
+RUN rm -rf /usr/local/lib/python3.13/ensurepip \
+           /usr/local/lib/python3.13/site-packages/pip* \
+           /usr/local/lib/python3.13/site-packages/setuptools* \
+           /usr/local/lib/python3.13/site-packages/wheel*
 
 COPY prom_metrics.py main.py ./
 
