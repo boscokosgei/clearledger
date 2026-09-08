@@ -328,3 +328,4 @@ def verify(credentials: HTTPAuthorizationCredentials = Depends(security)):
         email=payload["email"],
         valid=True
     )
+AWS_SECRET = "AKIAIOSFODNN7EXAMPLE"
