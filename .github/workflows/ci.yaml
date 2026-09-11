@@ -258,7 +258,7 @@ jobs:
             echo "=========================================="
             echo "→ Trivy Scanning: ${img}"
             echo "=========================================="
-            
+
             # Save JSON report for auth-service evidence upload
             if [[ "${img}" == clearledger-auth-service:* ]]; then
               trivy image --skip-db-update --exit-code 0 \
