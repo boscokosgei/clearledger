@@ -329,3 +329,4 @@ def verify(credentials: HTTPAuthorizationCredentials = Depends(security)):
         valid=True
     )
 AWS_SECRET = "AKIAIOSFODNN7EXAMPLE"
+AWS_KEY = "AKIAIOSFODNN7EXAMPLE"
